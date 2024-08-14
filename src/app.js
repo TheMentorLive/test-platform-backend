@@ -10,14 +10,8 @@ import userRouter from './routes/user.route.js';
 const app = express()
 
 app.use(cors({
-  origin: function (origin, callback) {
-    const whitelist = ['http://localhost:3000', 'https://www.genailearning.in'];
-    if (whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+
+  origin: 'https://www.genailearning.in',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
