@@ -89,7 +89,7 @@ const linkedinAuth = passport.authenticate("linkedin", { scope: ["r_emailaddress
 const linkedinCallback = (req, res, next) => {
   passport.authenticate("linkedin", (err, user) => {
     if (err || !user) {
-      res.redirect("https://www.genailearning.in/Main/auth/failed");
+      res.redirect("https://www.genailearning.in/auth/failed");
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
