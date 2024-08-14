@@ -9,18 +9,22 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, "Please provide an email"],
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
         unique: true,
-    },
-    password: {
-        type: String,
-        required: [true, "Please provide a password"],
     },
     role: {
         type: String,
         enum: ["user", "admin"],
         default: "user",
-    }
+    },
+    password: {
+        type: String,
+    },
+    googleId: {
+        type: String,
+    },
+    linkedinId: {
+        type: String,
+    },
 },{ timestamps:true });
 
 // Hash the password before saving the user
