@@ -11,7 +11,7 @@ const app = express()
 
 app.use(cors({
   origin: function (origin, callback) {
-    const whitelist = ['http://localhost:3000', 'https://test-platform-backend.onrender.com'];
+    const whitelist = ['http://localhost:3000', 'https://www.genailearning.in'];
     if (whitelist.includes(origin)) {
       callback(null, true);
     } else {
