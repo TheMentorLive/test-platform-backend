@@ -67,7 +67,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   user.password = undefined; // Remove password from response
   return res
   .status(200)
-  .cookie("token",token,options)
+  .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
   .json(new ApiResponse(200, { user, token }, "User logged in successfully"));
 
 });
@@ -86,7 +86,7 @@ const googleCallback = (req, res, next) => {
       expiresIn: "1d",
     });
     return res
-      .cookie("token",token,options)
+      .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
       .redirect("https://www.genailearning.in/Main/dash");
   })(req, res, next);
 };
@@ -104,7 +104,7 @@ const linkedinCallback = (req, res, next) => {
       expiresIn: "1d",
     });
     return res
-      .cookie("token", token,options)
+      .cookie("token", token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
       .redirect("https://www.genailearning.in/Main/dash");
   })(req, res, next);
 };
