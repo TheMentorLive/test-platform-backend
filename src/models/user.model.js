@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
+        required: [true, "Please provide a name"]
     },
     email: {
         type: String,
@@ -24,6 +25,12 @@ const userSchema = new mongoose.Schema({
     linkedinId: {
         type: String,
     },
+    resetPasswordToken: {
+        type: String,
+    },
+    resetPasswordTokenExpiry: {
+        type: Date,
+    }
 },{ timestamps:true });
 
 // Hash the password before saving the user
