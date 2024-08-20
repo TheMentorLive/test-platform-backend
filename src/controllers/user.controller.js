@@ -87,7 +87,7 @@ const googleCallback = (req, res, next) => {
     });
     return res
       .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/Main/dash");
+      .redirect("https://www.genailearning.in/dash-admin/DashboardPage");
   })(req, res, next);
 };
 
@@ -105,7 +105,7 @@ const linkedinCallback = (req, res, next) => {
     });
     return res
       .cookie("token", token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/Main/dash");
+      .redirect("https://www.genailearning.in/dash-admin/DashboardPage");
   })(req, res, next);
 };
 
