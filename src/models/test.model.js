@@ -13,6 +13,14 @@ const testSchema = new mongoose.Schema({
   description: {
     type: String
  },
+  isPaid: {
+      type: Boolean,
+      default: false
+   },
+   price: {
+      type: Number,
+      default: 0
+   },
   questions: [
     { type: mongoose.Schema.Types.ObjectId,
         ref: 'QuestionBank'

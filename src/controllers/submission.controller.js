@@ -10,7 +10,6 @@ const createSubmission = asyncHandler(async (req, res, next) => {
     const { testId, answers } = req.body;
     const userId = req.user._id;
 
-    try {
         // Validate required fields
         if (!testId || !answers || !userId) {
             return next(new ApiError(400, "Please provide all required fields"));
@@ -45,24 +44,35 @@ const createSubmission = asyncHandler(async (req, res, next) => {
         }
 
         // Return success response
-        return res.status(201).json(new ApiResponse(201, submission, "Submission created successfully"));
-
-    } catch (error) {
-        // Handle unexpected errors
-        return next(new ApiError(500, "An unexpected error occurred"));
-    }
+        return res
+        .status(201)
+        .json(new ApiResponse(201,{submissionId : submission._id}, "Submission created successfully"));
 });
 
-const getAllSubmissions = asyncHandler(async (req, res, next) => {
-    const submissions = await Submission.find();
-    if(!submissions) {
-        return next(new ApiError(404, "No submissions found"));
+const getSubmissionsForUser = asyncHandler(async (req, res, next) => {
+    const userId = req.user._id; // Assuming the user ID is available in req.user
+  
+    // Find all submissions for the given userId and populate the test details
+    const submissions = await Submission.find({ userId })
+      .populate('testId', 'title') // Populate testId with the test title
+  
+    if (submissions.length === 0) {
+      return res
+      .status(200)
+      .json(new ApiResponse(200, [], "No submissions found for the user"));
     }
-
+  
+    // Transform the submissions to include only the submission ID, test ID, and test name
+    const submissionsWithDetails = submissions.map(submission => ({
+      submissionId: submission._id,
+      testId: submission.testId._id, // Include test ID
+      testName: submission.testId.title, // Include test name
+    }));
+  
     return res
     .status(200)
-    .json(new ApiResponse(200, submissions, "Submissions Fecthed Successfully"));
-});
+    .json(new ApiResponse(200, submissionsWithDetails, "Submissions retrieved successfully"));
+  });
 
 const getSubmission = asyncHandler(async (req, res, next) => {
     const submissionId = req.params.id;
@@ -82,6 +92,6 @@ const getSubmission = asyncHandler(async (req, res, next) => {
 
 export {
     createSubmission,
-    getAllSubmissions,
+    getSubmissionsForUser,
     getSubmission
 }

@@ -32,10 +32,19 @@ const createUser = asyncHandler(async (req, res, next) => {
   if (!user) {
     throw new ApiError(400, "User not created");
   }
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
+  if (!token) {
+    throw new ApiError(500, "Token not generated");
+  }
+
+  user.password = undefined; // Remove password from response
   return res
+    .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
     .status(201)
-    .json(new ApiResponse(201, null, "User created successfully"));
+    .json(new ApiResponse(201, user, "User created successfully"));
 });
 
 // Manual User Login
@@ -68,7 +77,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   return res
   .status(200)
   .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-  .json(new ApiResponse(200, { user, token }, "User logged in successfully"));
+  .json(new ApiResponse(200, { user }, "User logged in successfully"));
 
 });
 
@@ -87,7 +96,7 @@ const googleCallback = (req, res, next) => {
     });
     return res
       .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/dash-admin/DashboardPage");
+      .redirect("https://www.genailearning.in/dash-admin/tests");
   })(req, res, next);
 };
 
@@ -105,7 +114,7 @@ const linkedinCallback = (req, res, next) => {
     });
     return res
       .cookie("token", token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/dash-admin/DashboardPage");
+      .redirect("https://www.genailearning.in/dash-admin/tests");
   })(req, res, next);
 };
 
@@ -211,6 +220,43 @@ const updateProfile = asyncHandler(async(req,res,next)=> {
   .json(new ApiResponse(200, null, "Profile updated successfully"));
 });
 
+const getAllUsers = asyncHandler(async (req, res) => {
+      // Fetch all users from the database, selecting only the necessary fields
+      const users = await User.find({}, 'name email role createdAt updatedAt');
+
+      if (!users.length) {
+          return res.status(404).json(new ApiError(404, "No users found"));
+      }
+
+      // Get the count of users
+      const count = await User.countDocuments();
+
+      // Send the response with user data and count
+      return res
+      .status(200)
+      .json(new ApiResponse(200, { users, count }, "All users fetched successfully"));
+});
+
+
+const deleteUser = asyncHandler(async (req, res) => {
+  // Find the user by id and delete
+  const id = req.params.id;
+  console.log("id is ",id);
+  if(!id) {
+      return res.status(400).json(new ApiError(400, "Please provide user id"));
+  }
+  const user = await User.findByIdAndDelete(id);
+
+  if (!user) {
+      return res.status(404).json(new ApiError(404, "User not found"));
+  }
+
+  // Send the response with the deleted user data
+  return res
+  .status(200)
+  .json(new ApiResponse(200, user, "User deleted successfully"));
+});
+
 
 export {
   createUser,
@@ -223,5 +269,7 @@ export {
   requestPasswordReset,
   resetPassword,
   updatePassword,
-  updateProfile
+  updateProfile,
+  getAllUsers,
+  deleteUser
 };

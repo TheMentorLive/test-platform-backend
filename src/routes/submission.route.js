@@ -1,6 +1,6 @@
 import {
     createSubmission,
-    getAllSubmissions,
+    getSubmissionsForUser,
     getSubmission } from "../controllers/submission.controller.js"
 
 import { authenticateUser } from "../middleware/auth.middleware.js";
@@ -11,7 +11,7 @@ import { Router } from "express"
 const router = Router();
 
 router.get('/:id',authenticateUser ,getSubmission)
-router.get('/all-submissions',authenticateUser, isAdmin,getAllSubmissions)
+router.get('/',authenticateUser, getSubmissionsForUser)
 router.post('/',authenticateUser,createSubmission)
 
 
