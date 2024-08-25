@@ -96,7 +96,7 @@ const googleCallback = (req, res, next) => {
     });
     return res
       .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("http://localhost:3000/dash-admin/tests");
+      .redirect("https://www.genailearning.in/dash-admin/tests");
   })(req, res, next);
 };
 
