@@ -96,7 +96,7 @@ const googleCallback = (req, res, next) => {
     });
     return res
       .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/dash-admin/tests");
+      .redirect("http://localhost:3000/dash-admin/tests");
   })(req, res, next);
 };
 
@@ -127,6 +127,20 @@ const logoutUser = asyncHandler(async (req, res, next) => {
     .json(new ApiResponse(200, null, "User logged out successfully"));
 });
 
+const getUserData = asyncHandler(async (req, res, next) => {
+  const id = req.user._id;
+  if(!id) {
+    return next(new ApiError(400, "Please provide user id"));
+  }
+  const user = await User.findById(id);
+  if(!user) {
+    return next(new ApiError(404, "User not found"));
+  }
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200, {user}, "User fetched successfully"));
+});
 
 const requestPasswordReset = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
@@ -271,5 +285,6 @@ export {
   updatePassword,
   updateProfile,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  getUserData,
 };

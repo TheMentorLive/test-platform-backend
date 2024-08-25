@@ -99,7 +99,6 @@ const getTest = asyncHandler(async (req, res, next) => {
     if (!testId) {
         return next(new ApiError(400, "Please provide a test ID"));
     }
-
     // Fetch the test by its ID and populate the questions and options
     const test = await Test.findById(testId)
     .populate({
@@ -110,7 +109,6 @@ const getTest = asyncHandler(async (req, res, next) => {
     if (!test) {
         return next(new ApiError(404, "Test not found"));
     }
-
     return res
         .status(200)
         .json(new ApiResponse(200, test, "Test fetched successfully"));

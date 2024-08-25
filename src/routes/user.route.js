@@ -1,7 +1,7 @@
 import express from "express";
 import { 
     createUser, loginUser, googleAuth, googleCallback, linkedinAuth, linkedinCallback, logoutUser,
-    requestPasswordReset, resetPassword, updatePassword, updateProfile, getAllUsers, deleteUser
+    requestPasswordReset, resetPassword, updatePassword, updateProfile, getAllUsers, deleteUser, getUserData
 } from "../controllers/user.controller.js";
 import { authenticateUser } from "../middleware/auth.middleware.js";
 import { isAdmin } from "../middleware/isAdmin.middleware.js";
@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get("/",authenticateUser, isAdmin, getAllUsers);
 router.delete("/:id",authenticateUser, isAdmin, deleteUser);
+
+router.get("/get-details", authenticateUser, getUserData);
 
 router.post("/signup", createUser);
 router.post("/login", loginUser);
