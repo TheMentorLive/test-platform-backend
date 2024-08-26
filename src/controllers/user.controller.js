@@ -86,20 +86,30 @@ const googleAuth = passport.authenticate("google", { scope: ["profile", "email"]
 
 // Google OAuth Callback
 const googleCallback = (req, res, next) => {
-  passport.authenticate("google", (err, user) => {
-    console.log("Error", err);
+  passport.authenticate("google", (err, user, info) => {
     if (err || !user) {
-      res.redirect("https://www.genailearning.in/auth/failed");
+      return res.redirect("https://www.genailearning.in/auth/failed");
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-    return res
-      .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
-      .redirect("https://www.genailearning.in/dash-admin/tests");
+
+    try {
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      return res
+        .cookie("token", token, {
+          httpOnly: true,
+          sameSite: "None",
+          secure: true,
+          maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        })
+        .redirect("https://www.genailearning.in/dash-admin/tests");
+    } catch (error) {
+      console.error('Error signing token:', error);
+      return res.redirect("https://www.genailearning.in/auth/failed");
+    }
   })(req, res, next);
 };
-
 // LinkedIn OAuth Login
 const linkedinAuth = passport.authenticate("linkedin", { scope: ["r_emailaddress", "r_liteprofile"] });
 
