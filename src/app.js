@@ -10,6 +10,7 @@ import testsRouter from './routes/tests.route.js';
 import submissionRouter from './routes/submission.route.js';
 import resultsRouter from './routes/results.route.js';
 import paymentRouter from './routes/payment.route.js';
+import userStatsRouter from './routes/userstats.route.js';
 
 
 const app = express()
@@ -45,6 +46,7 @@ app.use('/api/v1/tests', testsRouter)
 app.use('/api/v1/submission', submissionRouter)
 app.use('/api/v1/results',resultsRouter);
 app.use('/api/v1/payment',paymentRouter);
+app.use('/api/v1/userstats',userStatsRouter);
 
 
 
