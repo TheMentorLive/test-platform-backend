@@ -103,7 +103,7 @@ const googleCallback = (req, res, next) => {
           secure: true,
           maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         })
-        .redirect("http://localhost:3000/dash-admin/tests");
+        .redirect("https://www.genailearning.in/dash-admin/tests");
     } catch (error) {
       console.error('Error signing token:', error);
       return res.redirect("https://www.genailearning.in/auth/failed");
