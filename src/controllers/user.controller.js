@@ -21,19 +21,19 @@ const loginUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new ApiError(400, "Please provide all required fields");
+    return next(new ApiError(400, "Please provide email and password"));
   }
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw new ApiError(400, "User not found");
+    return next(new ApiError(400, "Invalid credentials"));
   }
   if (!user.isOtpVerified) {
-    throw new ApiError(400, "Please verify your email with the OTP sent");
+    return next(new ApiError(400, "User is not verified. Please verify your email with the OTP sent."));
   }
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw new ApiError(400, "Invalid credentials");
+    return next(new ApiError(400, "Invalid credentials"));
   }
 
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -41,7 +41,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   });
 
   if (!token) {
-    throw new ApiError(500, "Token not generated");
+    return next(new ApiError(500, "Token generation failed
   }
 
   user.password = undefined; // Remove password from response
@@ -108,7 +108,7 @@ async function otpGenerate(user) {
     user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
-    throw new ApiError(500, "Email could not be sent");
+    return false;
   }
 }
 
@@ -122,7 +122,7 @@ const createUser = asyncHandler(async (req, res, next) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ApiError(400, "User already exists with this email");
+    return next(new ApiError(400, "User already exists with this email"));
   }
 
   const user = new User({ email, name, password });
@@ -135,7 +135,7 @@ const createUser = asyncHandler(async (req, res, next) => {
 
     const otpGenerated = await otpGenerate(user);
     if (!otpGenerated) {
-      throw new ApiError(500, "OTP generation failed");
+      return next(new ApiError(500, "OTP generation failed"));
     }
 
     await user.save();
@@ -289,7 +289,7 @@ const requestPasswordReset = asyncHandler(async (req, res, next) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw new ApiError(404, "User not found");
+    return next(new ApiError(404, "User not found"));
   }
 
   // Generate reset token
@@ -310,7 +310,7 @@ const requestPasswordReset = asyncHandler(async (req, res, next) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordTokenExpiry = undefined;
     await user.save();
-    throw new ApiError(500, "Email could not be sent");
+    return next(new ApiError(500, "Email sending failed"));
   }
 });
 
