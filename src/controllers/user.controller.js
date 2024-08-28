@@ -103,7 +103,6 @@ async function otpGenerate(user) {
 
   try {
     await sendEmail(user.email, "OTP for account verification", message);
-    console.log("OTP sent to email");
     return true;
   } catch (error) {
     user.otp = undefined;
@@ -160,29 +159,24 @@ const createUser = asyncHandler(async (req, res, next) => {
 
 export const verifyOtp = asyncHandler(async (req, res, next) => {
   const { otp } = req.body;
-  console.log("otp is ",otp);
   const userId = req.cookies.user;
-  console.log("userId is ",userId);
 
   if(!otp || !userId) {
     return next(new ApiError(400, "Please provide OTP and userId"));
   }
 
   const user = await User.findById(userId);
-  console.log("user is",user);
 
   if(!user) {
     return next(new ApiError(404, "User not found"));
   }
 
   if(user.otp === otp && user.otpExpiry < Date.now()) {
-    console.log("Invalid OTP or OTP expired");
     return next(new ApiError(400, "Invalid OTP or OTP expired"));
   } else if ( user.otp !== otp ) { 
-    console.log("Invalid OTP");
     return next(new ApiError(400, "Invalid OTP"));
   }
-
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
   user.isOtpVerified = true;
   user.otp = undefined;
   user.otpExpiry = undefined;
@@ -190,7 +184,34 @@ export const verifyOtp = asyncHandler(async (req, res, next) => {
 
   return res
   .status(200)
-  .json(new ApiResponse(200, null, "OTP verified successfully"));
+  .cookie("token",token,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
+  .json(new ApiResponse(200, {user}, "OTP verified successfully"));
+});
+
+export const resendOtp = asyncHandler(async (req, res, next) => {
+  const emaiId = req.body.email;
+  if(!emaiId) {
+    return res.status(400).json(new ApiError(400, "Please provide email"));
+  }
+
+  const user = await User.findOne({ email: emaiId });
+  if(!user) {
+    return res.status(404).json(new ApiError(404, "User not found"));
+  }
+
+  if(user.isOtpVerified) {
+    return res.status(400).json(new ApiError(400, "User is already verified"));
+  }
+
+  const otpGenerated = await otpGenerate(user);
+  if (!otpGenerated) {
+    return res.status(500).json(new ApiError(500, "OTP generation failed"));
+  }
+  
+  return res
+  .status(200)
+  .cookie("user",user._id,{httpOnly:true,sameSite:"None",secure:true,maxAge:24*60*60*1000})
+  .json(new ApiResponse(200, null, "OTP sent successfully"));
 });
 
 // Google OAuth Login
@@ -217,7 +238,6 @@ const googleCallback = (req, res, next) => {
         })
         .redirect("https://www.genailearning.in/dash-admin/tests");
     } catch (error) {
-      console.error('Error signing token:', error);
       return res.redirect("https://www.genailearning.in/auth/failed");
     }
   })(req, res, next);
@@ -290,7 +310,6 @@ const requestPasswordReset = asyncHandler(async (req, res, next) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordTokenExpiry = undefined;
     await user.save();
-    console.log("error", error);
     throw new ApiError(500, "Email could not be sent");
   }
 });
@@ -377,7 +396,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
   // Find the user by id and delete
   const id = req.params.id;
-  console.log("id is ",id);
   if(!id) {
       return res.status(400).json(new ApiError(400, "Please provide user id"));
   }
