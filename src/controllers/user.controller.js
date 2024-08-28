@@ -41,7 +41,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   });
 
   if (!token) {
-    return next(new ApiError(500, "Token generation failed
+    return next(new ApiError(500, "Token generation failed"));
   }
 
   user.password = undefined; // Remove password from response
